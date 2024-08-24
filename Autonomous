@@ -1,0 +1,178 @@
+//rizzy rizzy autonomous!!!!
+//This autonomous has my special encoder onit and it also has zero power behavior on it
+//movement motors are still measured by time :(
+
+
+
+
+    package org.firstinspires.ftc.teamcode;
+
+    import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+    import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+    import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+    import com.qualcomm.robotcore.hardware.DcMotor;
+    import com.qualcomm.robotcore.hardware.DcMotorSimple;
+    import com.qualcomm.robotcore.util.ElapsedTime;
+    import com.qualcomm.robotcore.hardware.Servo;
+
+    @Autonomous(name="MoveForwardCopy", group="Robot")
+
+    public class FirstAuto extends LinearOpMode {
+
+        /* Declare OpMode members. */
+        private DcMotor         leftDrive   = null;
+        private DcMotor         rightDrive  = null;
+        private DcMotor         leftArm = null;
+        private DcMotor         rightArm = null;
+        private Servo           wristServo = null;
+        private Servo           handServo = null;
+
+        private ElapsedTime     runtime = new ElapsedTime();
+        private int leftPos;
+        private int rightPos;
+
+
+        static final double     FORWARD_SPEED = 1.5;
+        static final double     TURN_SPEED    = 0.5;
+
+        //@Override
+        public void moveForward(double time, double FOR_SPEED) {
+
+            runtime.reset();
+            while (runtime.seconds() <= time) {
+                leftDrive.setPower(FOR_SPEED);
+                rightDrive.setPower(FOR_SPEED);
+                telemetry.addData("Path", "Leg 1: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            leftDrive.setPower(0);
+            rightDrive.setPower(0);
+        }
+        // // Step 2:  Spin right for 1.3 seconds
+        // leftDrive.setPower(TURN_SPEED);
+        // rightDrive.setPower(-TURN_SPEED);
+        // runtime.reset();
+        // while (opModeIsActive() && (runtime.seconds() < 1.3)) {
+        //     telemetry.addData("Path", "Leg 2: %4.1f S Elapsed", runtime.seconds());
+        //     telemetry.update();
+        // }
+
+        // // Step 3:  Drive Backward for 1 Second
+        // leftDrive.setPower(-FORWARD_SPEED);
+        // rightDrive.setPower(-FORWARD_SPEED);
+        // runtime.reset();
+        // while (opModeIsActive() && (runtime.seconds() < 1.0)) {
+        //     telemetry.addData("Path", "Leg 3: %4.1f S Elapsed", runtime.seconds());
+        //     telemetry.update();
+        // }
+
+        // Step 4:  Stop
+        public void turnLeft(double time){
+            runtime.reset();
+            while (runtime.seconds() < time) {
+                leftDrive.setPower(TURN_SPEED);
+                rightDrive.setPower(-TURN_SPEED);
+                telemetry.addData("Path", "Leg 2: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            leftDrive.setPower(0);
+            rightDrive.setPower(0);
+        }
+
+        public void turnRight(double time){
+            runtime.reset();
+            while (runtime.seconds() < time) {
+                leftDrive.setPower(-TURN_SPEED);
+                rightDrive.setPower(TURN_SPEED);
+                telemetry.addData("Path", "Leg 2: %4.1f S Elapsed", runtime.seconds());
+                telemetry.update();
+            }
+            leftDrive.setPower(0);
+            rightDrive.setPower(0);
+        }
+
+        public void turnWrist(double posWrist){
+            wristServo.setPosition(posWrist);
+            //sleep(3);
+        }
+        public void turnHand(double posHand){
+            handServo.setPosition(posHand);
+            // sleep(3);
+        }
+        public void moveArm(int leftTarget, int rightTarget, double speed){
+            leftPos += leftTarget;
+            rightPos += rightTarget;
+
+            leftArm.setTargetPosition(leftPos);
+            rightArm.setTargetPosition(rightPos);
+
+            leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            leftArm.setPower(speed);
+            rightArm.setPower(speed);
+
+            while(leftArm.isBusy() && rightArm.isBusy()){
+                idle();
+            }
+        }
+
+
+        public void runOpMode() {
+            // Initialize the drive system variables.
+            leftDrive  = hardwareMap.get(DcMotor.class, "motor_1");
+            rightDrive = hardwareMap.get(DcMotor.class, "motor_2");
+            wristServo = hardwareMap.get(Servo.class, "wrist");
+            handServo = hardwareMap.get(Servo.class, "hand");
+            leftArm = hardwareMap.get(DcMotor.class, "armL");
+            rightArm = hardwareMap.get(DcMotor.class, "armR");
+            // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
+            // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
+            // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
+            leftDrive.setDirection(DcMotor.Direction.FORWARD);
+            rightDrive.setDirection(DcMotor.Direction.REVERSE);
+            leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightArm.setDirection(DcMotorSimple.Direction.REVERSE);
+            leftPos = 0;
+            rightPos = 0;
+            leftArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rightArm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+            // Send telemetry message to signify robot waiting;
+            telemetry.addData("Status", "Ready to run");    //
+            telemetry.update();
+
+            // Wait for the game to start (driver presses PLAY)
+            waitForStart();
+
+            // Step through each leg of the path, ensuring that the Auto mode has not been stopped along the way
+            while (opModeIsActive()){
+//                moveForward(1.00, 1.00);
+//                sleep(50);
+//                turnRight(1.25);
+//                sleep(50);
+//                turnHand(0.5);
+//                sleep(3000);
+//                turnWrist(0.5);
+//                sleep(1000);
+//                moveForward(1.00, 1.00);
+//                sleep(50);
+                moveArm(100,100,0.25);
+                sleep(5000000);
+                // sleep(1);
+                // for(int i = 0; i<3; i++){
+                //     turnWrist(8,0.1);
+                //     // sleep(1);
+                //     // turnHand(8,0.5);
+                // }
+                // for(int i = 0; i<3; i++){
+                //     turnHand(8,0.5);
+                //     // sleep(1);
+                //     // turnHand(8,0.5);
+                // }
+                break;
+            }
+            //turnHand();
+        }
+    }
