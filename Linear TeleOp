@@ -1,0 +1,77 @@
+//Code details:
+//Everything is measured by time (even though me and gavin already made a encoded version)
+//don't change servo numbers!!! I tested those out
+//here is my sigma code:
+
+
+
+@TeleOp(name="AndroidStudioSkibidi")
+
+public class LinearTeleOp extends LinearOpMode {
+
+    // Declare OpMode members.
+    private DcMotor motor_L;
+    private DcMotor motor_R;
+    private Servo servoWrist;
+    private Servo servoHand;
+    private DcMotor armL;
+    private DcMotor armR;
+
+    @Override
+    public void runOpMode() {
+
+        motor_L  = hardwareMap.get(DcMotor.class, "motor_1");
+        motor_R = hardwareMap.get(DcMotor.class, "motor_2");
+        servoWrist = hardwareMap.get(Servo.class, "wrist");
+        servoHand = hardwareMap.get(Servo.class, "hand");
+        armL = hardwareMap.get(DcMotor.class, "armL");
+        armR = hardwareMap.get(DcMotor.class, "armR");
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+
+            // Setup a variable for each drive wheel to save power level for telemetry
+
+            // Choose to drive using either Tank Mode, or POV Mode
+            // Comment out the method that's not used.  The default below is POV.
+
+            // POV Mode uses left stick to go forward, and right stick to turn.
+            // - This uses basic math to combine motions and is easier to drive straight.
+            double forward_speed = gamepad1.left_stick_y;
+            double turn = gamepad1.right_stick_x;
+
+            boolean wrist_moveUp = gamepad2.x;
+            boolean wrist_moveDown = gamepad2.y;
+            boolean hand_moveUp = gamepad2.a;
+            boolean hand_moveDown = gamepad2.b;
+            double arm_move = gamepad2.left_stick_y;
+
+            motor_L.setPower((-(forward_speed - turn)));
+            motor_R.setPower((forward_speed + turn));
+            // if (hand_moveUp){
+            //     servoHand.setPosition(5);
+            // }
+            // if (hand_moveDown){
+            //     servoHand.setPosition(0.3);
+            // }
+            if (wrist_moveUp){
+                servoWrist.setPosition(0.8);
+            }
+            if (wrist_moveDown){
+                servoWrist.setPosition(0.0);
+            }
+            if(hand_moveUp){
+                servoHand.setPosition(0.8);
+            }
+            if(hand_moveDown){
+                servoHand.setPosition(0.0);
+            }
+            telemetry.update();
+            armL.setPower(0.5 * arm_move);
+            armR.setPower(0.5 * -(arm_move));
+            //armL.
+
+        }
+    }
+}
